@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>M&P - Our Journey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Cormorant+Garamond:wght@400;500&family=Lato:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FDF8F5;
+      --spine: #E8D5D0;
+      --accent: #D4A5A5;
+      --text-primary: #5C4A4A;
+      --text-secondary: #8B7676;
+      --card-bg: #FFFFFF;
+      --card-shadow: rgba(92, 74, 74, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Lato', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding-top: 30vh;
+      padding-bottom: 10vh;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      font-size: 5rem;
+      color: var(--text-primary);
+      letter-spacing: 0.15em;
+    }
+
+    .scroll-indicator {
+      margin-top: 3rem;
+      animation: bounce 2s ease infinite;
+      color: var(--text-secondary);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      letter-spacing: 0.2em;
+      text-transform: lowercase;
+    }
+
+    .scroll-indicator .chevron {
+      display: block;
+      margin-top: 0.5rem;
+      font-size: 1.5rem;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); opacity: 1; }
+      50% { transform: translateY(10px); opacity: 0.5; }
+    }
+
+    /* ── Timeline ── */
+    .timeline {
+      position: relative;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1rem 4rem;
+    }
+
+    /* Spine */
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 100%;
+      background: var(--spine);
+    }
+
+    /* Progress fill on spine */
+    .timeline-progress {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 0;
+      background: var(--accent);
+      transition: height 0.3s ease-out;
+      z-index: 1;
+    }
+
+    /* ── Milestone ── */
+    .milestone {
+      position: relative;
+      width: 50%;
+      padding: 1.5rem 2.5rem;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .milestone.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Left / right positioning */
+    .milestone.left {
+      left: 0;
+      text-align: right;
+    }
+
+    .milestone.right {
+      left: 50%;
+      text-align: left;
+    }
+
+    /* Date marker on spine */
+    .milestone .date-marker {
+      position: absolute;
+      top: 2rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.65rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      line-height: 1.1;
+      text-align: center;
+    }
+
+    .milestone.left .date-marker {
+      right: -20px;
+    }
+
+    .milestone.right .date-marker {
+      left: -20px;
+    }
+
+    /* Card */
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 24px;
+      max-width: 420px;
+      box-shadow: 0 4px 20px var(--card-shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: inline-block;
+      text-align: left;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(92, 74, 74, 0.18);
+    }
+
+    .card .card-date {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .card .card-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 400;
+      font-size: 1.15rem;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+
+    .card .image-wrapper {
+      overflow: hidden;
+      border-radius: 6px;
+    }
+
+    .card .image-placeholder {
+      width: 100%;
+      height: 200px;
+      border: 2px dashed var(--spine);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-family: 'Lato', sans-serif;
+      transition: transform 0.4s ease, filter 0.4s ease;
+    }
+
+    .card .card-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease, filter 0.4s ease;
+    }
+
+    .card .image-wrapper:hover .card-image,
+    .card .image-wrapper:hover .image-placeholder {
+      transform: scale(1.08);
+      filter: brightness(1.05);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 3rem 1rem 5rem;
+      font-size: 2.5rem;
+      color: var(--accent);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .footer.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Tablet ── */
+    @media (max-width: 768px) {
+      .header {
+        padding-top: 20vh;
+        padding-bottom: 8vh;
+      }
+
+      .header h1 {
+        font-size: 3.5rem;
+      }
+
+      .timeline {
+        padding: 2rem 0.5rem 3rem;
+      }
+
+      .timeline::before {
+        left: 20px;
+        transform: none;
+      }
+
+      .timeline-progress {
+        left: 20px;
+        transform: none;
+      }
+
+      .milestone {
+        width: 100%;
+        padding-left: 50px;
+        padding-right: 1rem;
+        left: 0 !important;
+        text-align: left !important;
+      }
+
+      .milestone .date-marker {
+        left: 0 !important;
+        right: auto !important;
+      }
+
+      .card {
+        max-width: 100%;
+        display: block;
+      }
+    }
+
+    /* ── Small phone ── */
+    @media (max-width: 480px) {
+      .header {
+        padding-top: 15vh;
+        padding-bottom: 6vh;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        letter-spacing: 0.1em;
+      }
+
+      .scroll-indicator {
+        margin-top: 2rem;
+        font-size: 0.85rem;
+      }
+
+      .timeline {
+        padding: 1.5rem 0.25rem 2rem;
+      }
+
+      .timeline::before {
+        left: 15px;
+      }
+
+      .timeline-progress {
+        left: 15px;
+      }
+
+      .milestone {
+        padding: 1rem 0.5rem 1rem 42px;
+      }
+
+      .milestone .date-marker {
+        left: -4px !important;
+        width: 34px;
+        height: 34px;
+        font-size: 0.55rem;
+      }
+
+      .card {
+        padding: 16px;
+        border-radius: 8px;
+      }
+
+      .card .card-date {
+        font-size: 0.85rem;
+      }
+
+      .card .card-title {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .card .card-image,
+      .card .image-placeholder {
+        height: 130px;
+      }
+
+      .footer {
+        padding: 2rem 1rem 3rem;
+        font-size: 2rem;
+      }
+    }
+
+    /* ── Very small screens ── */
+    @media (max-width: 360px) {
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .card .card-image,
+      .card .image-placeholder {
+        height: 110px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <h1>M&amp;P</h1>
+    <div class="scroll-indicator">
+      scroll
+      <span class="chevron">&#8964;</span>
+    </div>
+  </header>
+
+  <!-- Timeline -->
+  <section class="timeline" id="timeline">
+    <div class="timeline-progress" id="timeline-progress"></div>
+    <!-- Milestones rendered by JS -->
+  </section>
+
+  <!-- Footer -->
+  <div class="footer" id="footer">&hearts;</div>
+
+  <script>
+    (async function () {
+      // Fetch milestones
+      const res = await fetch('milestones.json');
+      const data = await res.json();
+      const milestones = data.milestones;
+
+      const timeline = document.getElementById('timeline');
+
+      // Render milestones
+      milestones.forEach((m, i) => {
+        const side = i % 2 === 0 ? 'left' : 'right';
+
+        const el = document.createElement('div');
+        el.className = `milestone ${side}`;
+        el.style.transitionDelay = `${i * 0.1}s`;
+
+        const imageHTML = m.image
+          ? `<div class="image-wrapper"><img class="card-image" src="photos/${m.image}" alt="${m.title}"></div>`
+          : `<div class="image-wrapper"><div class="image-placeholder">photo coming soon</div></div>`;
+
+        el.innerHTML = `
+          <div class="date-marker">${m.date}</div>
+          <div class="card">
+            <div class="card-date">${m.date}</div>
+            <div class="card-title">${m.title}</div>
+            ${imageHTML}
+          </div>
+        `;
+
+        timeline.appendChild(el);
+      });
+
+      // Intersection Observer for scroll-reveal
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+
+      document.querySelectorAll('.milestone').forEach((el) => observer.observe(el));
+
+      // Footer observer
+      const footer = document.getElementById('footer');
+      observer.observe(footer);
+
+      // Timeline spine progress fill
+      const progress = document.getElementById('timeline-progress');
+
+      function updateProgress() {
+        const rect = timeline.getBoundingClientRect();
+        const timelineTop = rect.top + window.scrollY;
+        const timelineHeight = rect.height;
+        const scrolled = window.scrollY + window.innerHeight - timelineTop;
+        const pct = Math.min(Math.max(scrolled / timelineHeight, 0), 1);
+        progress.style.height = pct * timelineHeight + 'px';
+      }
+
+      window.addEventListener('scroll', updateProgress, { passive: true });
+      updateProgress();
+    })();
+  </script>
+</body>
+</html>
