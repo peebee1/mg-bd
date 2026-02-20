@@ -275,6 +275,75 @@
 
     .end-panel.visible { opacity: 1; }
 
+    /* ── Password gate ── */
+    #gate {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2.5rem;
+      transition: opacity 0.8s ease;
+    }
+
+    #gate.unlocking {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .gate-prompt {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--text-primary);
+    }
+
+    #gate-input {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--accent);
+      outline: none;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--text-primary);
+      width: 14rem;
+      text-align: center;
+      padding-bottom: 2px;
+      caret-color: var(--accent);
+      letter-spacing: 0.15em;
+    }
+
+    #gate-input::placeholder {
+      color: var(--spine);
+    }
+
+    .gate-hint {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.1em;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .gate-hint.show { opacity: 1; }
+
+    @keyframes gate-shake {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-8px); }
+      40%       { transform: translateX(8px); }
+      60%       { transform: translateX(-5px); }
+      80%       { transform: translateX(5px); }
+    }
+
+    .gate-prompt.shake { animation: gate-shake 0.4s ease; }
+
     /* ── Lightbox ── */
     .lightbox {
       display: none;
@@ -319,6 +388,16 @@
 </head>
 <body>
 
+  <!-- Password gate -->
+  <div id="gate">
+    <div class="gate-prompt">
+      <span>Hmmmm...</span>
+      <input id="gate-input" type="text" autocomplete="off" spellcheck="false" placeholder="?">
+      <span>!!</span>
+    </div>
+    <div class="gate-hint" id="gate-hint">try again ♡</div>
+  </div>
+
   <div class="scroll-wrapper" id="scroll-wrapper">
 
     <!-- Landing -->
@@ -346,6 +425,76 @@
   </div>
 
   <script>
+    // ── Password gate ──
+    (async function () {
+      // To set your password, run this in the browser console and paste the result below:
+      // async function h(w){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(w.toLowerCase().trim()));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}h('yourword').then(console.log);
+      const HASH = '637ab2808704d851a93ba9a6de8c6b957c5b7e30d4c16bb767df4fb37ff4ddae';
+
+      const gate   = document.getElementById('gate');
+      const input  = document.getElementById('gate-input');
+      const prompt = document.querySelector('.gate-prompt');
+      const hint   = document.getElementById('gate-hint');
+
+      if (sessionStorage.getItem('unlocked') === '1') {
+        gate.remove();
+      } else {
+        input.focus();
+
+        let realValue = '';
+        let maskedUpTo = 0;
+        let maskTimeout = null;
+
+        function updateDisplay() {
+          input.value = '♥'.repeat(maskedUpTo) + realValue.slice(maskedUpTo);
+        }
+
+        async function check() {
+          const val = realValue.toLowerCase().trim();
+          if (!val) return;
+
+          const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(val));
+          const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+          if (hash === HASH) {
+            sessionStorage.setItem('unlocked', '1');
+            gate.classList.add('unlocking');
+            setTimeout(() => gate.remove(), 800);
+          } else {
+            realValue = '';
+            maskedUpTo = 0;
+            clearTimeout(maskTimeout);
+            input.value = '';
+            hint.classList.add('show');
+            prompt.classList.remove('shake');
+            void prompt.offsetWidth;
+            prompt.classList.add('shake');
+          }
+        }
+
+        input.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { check(); return; }
+          if (e.ctrlKey || e.metaKey) return;
+          e.preventDefault();
+          if (e.key === 'Backspace') {
+            clearTimeout(maskTimeout);
+            realValue = realValue.slice(0, -1);
+            maskedUpTo = Math.min(maskedUpTo, realValue.length);
+          } else if (e.key.length === 1) {
+            realValue += e.key;
+            maskedUpTo = realValue.length - 1; // show last char
+            clearTimeout(maskTimeout);
+            maskTimeout = setTimeout(() => {
+              maskedUpTo = realValue.length;
+              updateDisplay();
+            }, 600);
+          }
+          updateDisplay();
+        });
+      }
+    })();
+
+    // ── Timeline ──
     (async function () {
       const res       = await fetch('milestones.json');
       const data      = await res.json();
