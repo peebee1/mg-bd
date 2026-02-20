@@ -16,7 +16,7 @@
       --text-secondary: #8B7676;
       --card-bg: #FFFFFF;
       --card-shadow: rgba(92, 74, 74, 0.1);
-      --marker: 44px;
+      --marker: 14px;
       --stem: 44px;
     }
 
@@ -163,15 +163,6 @@
       height: var(--marker);
       border-radius: 50%;
       background: var(--accent);
-      color: #fff;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.6rem;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      line-height: 1.2;
       flex-shrink: 0;
     }
 
@@ -188,15 +179,6 @@
 
     .milestone.top    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(92,74,74,.18); }
     .milestone.bottom .card:hover { transform: translateY( 4px); box-shadow: 0 8px 30px rgba(92,74,74,.18); }
-
-    .card-date {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--accent);
-      margin-bottom: 0.4rem;
-      letter-spacing: 0.05em;
-    }
 
     .card-title {
       font-family: 'Playfair Display', serif;
@@ -272,7 +254,7 @@
 
     /* ── Small viewport height adjustments ── */
     @media (max-height: 600px) {
-      :root { --stem: 28px; --marker: 36px; }
+      :root { --stem: 28px; --marker: 10px; }
       .landing-panel h1 { font-size: 3.5rem; }
       .card { width: 200px; padding: 14px; }
       .card-image { height: 110px; }
@@ -342,11 +324,10 @@
         const titleClick = hasImage ? `onclick="revealImage(${i})"` : '';
 
         const card   = `<div class="card">
-          <div class="card-date">${m.date}</div>
           <div class="${titleClass}" ${titleClick}>${m.title}</div>
           ${imageBlock}
         </div>`;
-        const marker = `<div class="date-marker">${m.date}</div>`;
+        const marker = `<div class="date-marker"></div>`;
         const stem   = `<div class="stem"></div>`;
 
         // top:    card → stem → marker  (marker anchored at spine via flex-end)
