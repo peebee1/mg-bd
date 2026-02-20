@@ -171,10 +171,32 @@
       background: var(--card-bg);
       border-radius: 10px;
       padding: 20px;
-      width: 240px;
+      width: 360px;
       box-shadow: 0 4px 20px var(--card-shadow);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card.shimmering::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        105deg,
+        transparent 40%,
+        rgba(212, 165, 165, 0.35) 50%,
+        transparent 60%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 2.5s ease infinite;
+      pointer-events: none;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
 
     .milestone.top    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(92,74,74,.18); }
@@ -186,6 +208,7 @@
       font-size: 1rem;
       color: var(--text-primary);
       margin-bottom: 0.6rem;
+      text-align: center;
     }
 
     .card-title.clickable {
@@ -206,11 +229,11 @@
       transition: max-height 0.65s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .image-reveal-wrapper.revealed { max-height: 200px; }
+    .image-reveal-wrapper.revealed { max-height: 460px; }
 
     .card-image {
       width: 100%;
-      height: 160px;
+      height: 420px;
       object-fit: cover;
       display: block;
       border-radius: 6px;
@@ -252,13 +275,45 @@
 
     .end-panel.visible { opacity: 1; }
 
+    /* ── Lightbox ── */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+
+    .lightbox.open {
+      display: flex;
+    }
+
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 6px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      animation: pop 0.2s ease;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0.92); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+
+    .card-image { cursor: zoom-in; }
+
     /* ── Small viewport height adjustments ── */
     @media (max-height: 600px) {
       :root { --stem: 28px; --marker: 10px; }
       .landing-panel h1 { font-size: 3.5rem; }
       .card { width: 200px; padding: 14px; }
-      .card-image { height: 110px; }
-      .image-reveal-wrapper.revealed { max-height: 120px; }
+      .card-image { height: 180px; }
+      .image-reveal-wrapper.revealed { max-height: 200px; }
     }
   </style>
 </head>
@@ -285,6 +340,11 @@
 
   </div>
 
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <img id="lightbox-img" src="" alt="">
+  </div>
+
   <script>
     (async function () {
       const res       = await fetch('milestones.json');
@@ -296,12 +356,31 @@
       const progress = document.getElementById('spine-progress');
       const endPanel = document.getElementById('end-panel');
 
-      // Reveal image for milestone i
+      // Lightbox
+      const lightbox    = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightbox-img');
+
+      lightbox.addEventListener('click', () => {
+        lightbox.classList.remove('open');
+        lightboxImg.src = '';
+      });
+
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') lightbox.classList.remove('open');
+      });
+
+      window.openLightbox = function (src) {
+        lightboxImg.src = src;
+        lightbox.classList.add('open');
+      };
+
+      // Toggle image reveal for milestone i
       window.revealImage = function (i) {
         const wrap = document.getElementById('img-' + i);
-        const hint = document.getElementById('hint-' + i);
-        if (wrap) wrap.classList.add('revealed');
-        if (hint) hint.classList.add('gone');
+        const card = document.getElementById('card-' + i);
+        if (!wrap) return;
+        const isRevealed = wrap.classList.toggle('revealed');
+        if (card) card.classList.toggle('shimmering', !isRevealed);
       };
 
       // Render milestones
@@ -315,15 +394,15 @@
 
         const imageBlock = hasImage ? `
           <div class="image-reveal-wrapper" id="img-${i}">
-            <img class="card-image" src="photos/${m.image}" alt="${m.title}">
+            <img class="card-image" src="photos/${m.image}" alt="${m.title}" onclick="openLightbox('photos/${m.image}')">
           </div>
-          <div class="reveal-hint" id="hint-${i}" onclick="revealImage(${i})">✦ tap to reveal</div>
         ` : '';
 
         const titleClass = `card-title${hasImage ? ' clickable' : ''}`;
         const titleClick = hasImage ? `onclick="revealImage(${i})"` : '';
+        const shimmerClass = hasImage ? ' shimmering' : '';
 
-        const card   = `<div class="card">
+        const card   = `<div class="card${shimmerClass}" id="card-${i}">
           <div class="${titleClass}" ${titleClick}>${m.title}</div>
           ${imageBlock}
         </div>`;
